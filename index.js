@@ -1,0 +1,86 @@
+/// <reference types="../CTAutocomplete" />
+
+import Skyblock from "../BloomCore/Skyblock";
+import PogObject from "../PogData";
+
+const data = new PogObject("bigdiamond", {
+    x: 100,
+    y: 100,
+    scale: 1.0
+}, "settings.json");
+
+const GUI = new Gui();
+
+GUI.registerMouseDragged( (mx, my, c, t) => {
+    data.x = mx
+    data.y = my
+});
+
+GUI.registerScrolled( (mx, my, dir) => {
+    data.scale += (dir / 10.0);
+});
+
+GUI.registerClosed( () => {
+    data.save();
+});
+
+let totalItems = 0;
+let totalSeconds = 0;
+let totalItemsStr = "0";
+let profitStr = "0";
+let lastItems = 0;
+let lastSeconds = 0;
+let isRegistered = false;
+
+
+register("command", () => {
+    GUI.open();
+}).setName("bigdiamond").setAliases(["bigd"]);
+
+const profitDisplay = register("renderOverlay", () => {
+    Renderer.scale(data.scale);
+    Renderer.translate(data.x / data.scale, data.y / data.scale);
+    Renderer.drawString(`$total > ${totalItemsStr}`, 0, 0);
+    Renderer.scale(data.scale);
+    Renderer.translate(data.x / data.scale, data.y / data.scale);
+    Renderer.drawString(`$hr > ${profitStr}`, 0, 10);
+}).unregister();
+
+const chatTracker = register("chat", (numItems, seconds) => {
+    numItems = parseInt(numItems.replaceAll(",", ""));
+    seconds = parseInt(seconds);
+    totalItems += numItems;
+    lastItems = numItems;
+    totalSeconds += seconds;
+    lastSeconds = seconds;
+    totalItemsStr = (totalItems * 8).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    profitStr = Math.floor(totalItems / totalSeconds) * 3600 * 8;
+    profitStr = profitStr.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}).setCriteria(/\[Sacks\] \+(.+) items. \(Last (\d+)s.\)/).unregister();
+
+const compactTracker = register("chat", () => {
+    totalItems += 160;
+}).setCriteria("COMPACT! You found an Enchanted Diamond!").unregister();
+
+const worldSearch = register("step", () => {
+    if (!Skyblock?.area) return;
+    
+    if (Skyblock.area?.includes("Dwarven Mines")) {
+        isRegistered = true;
+        profitDisplay.register();
+        chatTracker.register();
+        compactTracker.register();
+    } else {
+        worldSearch.unregister();
+    }
+}).setFps(2).unregister();
+
+register("worldLoad", () => {
+    if (isRegistered) {
+        profitDisplay.unregister();
+        chatTracker.unregister();
+        compactTracker.unregister();
+    }
+    worldSearch.register();
+});
+
