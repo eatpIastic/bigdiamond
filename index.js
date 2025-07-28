@@ -47,7 +47,7 @@ const profitDisplay = register("renderOverlay", () => {
 }).unregister();
 
 const chatTracker = register("chat", (numItems, seconds) => {
-    numItems = parseInt(numItems.replaceAll(",", ""));
+    numItems = parseInt(numItems.replaceAll(",", "")) * 160;
     seconds = parseInt(seconds);
     totalItems += numItems;
     lastItems = numItems;
@@ -58,10 +58,6 @@ const chatTracker = register("chat", (numItems, seconds) => {
     profitStr = profitStr.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }).setCriteria(/\[Sacks\] \+(.+) items. \(Last (\d+)s.\)/).unregister();
 
-const compactTracker = register("chat", () => {
-    totalItems += 160;
-}).setCriteria("COMPACT! You found an Enchanted Diamond!").unregister();
-
 const worldSearch = register("step", () => {
     if (!Skyblock?.area) return;
     
@@ -69,7 +65,6 @@ const worldSearch = register("step", () => {
         isRegistered = true;
         profitDisplay.register();
         chatTracker.register();
-        compactTracker.register();
     } else {
         worldSearch.unregister();
     }
@@ -79,7 +74,6 @@ register("worldLoad", () => {
     if (isRegistered) {
         profitDisplay.unregister();
         chatTracker.unregister();
-        compactTracker.unregister();
     }
     worldSearch.register();
 });
