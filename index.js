@@ -28,8 +28,6 @@ let totalItems = 0;
 let totalSeconds = 0;
 let totalItemsStr = "0";
 let profitStr = "0";
-let lastItems = 0;
-let lastSeconds = 0;
 let isRegistered = false;
 
 
@@ -46,13 +44,22 @@ const profitDisplay = register("renderOverlay", () => {
     Renderer.drawString(`$hr > ${profitStr}`, 0, 10);
 }).unregister();
 
-const chatTracker = register("chat", (numItems, seconds) => {
-    numItems = parseInt(numItems.replaceAll(",", "")) * 160;
+const chatTracker = register("chat", (numItems, seconds, event) => {
     seconds = parseInt(seconds);
-    totalItems += numItems;
-    lastItems = numItems;
     totalSeconds += seconds;
-    lastSeconds = seconds;
+    let hoverValue = new Message(event).getMessageParts().find(text => text.getHoverValue() != null)?.getHoverValue()?.removeFormatting().split("\n");
+    if (!hoverValue) return;
+    for(let i = 0; i < hoverValue.length; i++) {
+        let line = hoverValue[i].match(/\+([\d,]+) (Enchanted Diamond|Diamond) \(/);
+        if (!line) continue;
+        let amt = parseInt(line[1]);
+        let item = line[2];
+        if (item == "Enchanted Diamond") {
+            amt *= 160;
+        }
+        totalItems += amt;
+    }
+
     totalItemsStr = (totalItems * 8).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     profitStr = Math.floor(totalItems / totalSeconds) * 3600 * 8;
     profitStr = profitStr.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -77,4 +84,3 @@ register("worldLoad", () => {
     }
     worldSearch.register();
 });
-
