@@ -45,10 +45,10 @@ register("command", (...args) => {
 const profitDisplay = register("renderOverlay", () => {
     Renderer.scale(data.scale);
     Renderer.translate(data.x / data.scale, data.y / data.scale);
-    Renderer.drawString(`§7$total > §f${totalItemsStr}`, 0, 0);
+    Renderer.drawString(`§a$total > §f${totalItemsStr}`, 0, 0);
     Renderer.scale(data.scale);
     Renderer.translate(data.x / data.scale, data.y / data.scale);
-    Renderer.drawString(`§7$hr > §f${profitStr}`, 0, 10);
+    Renderer.drawString(`§a$hr > §f${profitStr}`, 0, 10);
 }).unregister();
 
 const chatTracker = register("chat", (numItems, seconds, event) => {
