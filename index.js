@@ -59,7 +59,7 @@ const chatTracker = register("chat", (numItems, seconds, event) => {
     for(let i = 0; i < hoverValue.length; i++) {
         let line = hoverValue[i].match(/\+([\d,]+) (Enchanted Diamond|Diamond) \(/);
         if (!line) continue;
-        let amt = parseInt(line[1]);
+        let amt = parseInt(line[1].replaceAll(",", ""));
         let item = line[2];
         if (item == "Enchanted Diamond") {
             amt *= 160;
