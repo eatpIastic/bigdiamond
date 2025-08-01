@@ -31,17 +31,24 @@ let profitStr = "0";
 let isRegistered = false;
 
 
-register("command", () => {
+register("command", (...args) => {
+    if (args?.[0]) {
+        totalItems = 0;
+        totalSeconds = 0;
+        totalItemsStr = "0";
+        profitStr = "0";
+        return;
+    }
     GUI.open();
 }).setName("bigdiamond").setAliases(["bigd"]);
 
 const profitDisplay = register("renderOverlay", () => {
     Renderer.scale(data.scale);
     Renderer.translate(data.x / data.scale, data.y / data.scale);
-    Renderer.drawString(`$total > ${totalItemsStr}`, 0, 0);
+    Renderer.drawString(`§7$total > §f${totalItemsStr}`, 0, 0);
     Renderer.scale(data.scale);
     Renderer.translate(data.x / data.scale, data.y / data.scale);
-    Renderer.drawString(`$hr > ${profitStr}`, 0, 10);
+    Renderer.drawString(`§7$hr > §f${profitStr}`, 0, 10);
 }).unregister();
 
 const chatTracker = register("chat", (numItems, seconds, event) => {
